@@ -24,16 +24,18 @@ def post_image_file_path(instance, filename):
 class Post(models.Model):
     title = models.CharField(max_length=65, unique=True)
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_Add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     hashtags = models.ManyToManyField(Hashtag, related_name="posts")
     image = models.ImageField(
-        null=True, blank=True, upload_to=post_image_file_path
+        blank=True, null=True, upload_to=post_image_file_path
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts"
     )
     liked_by = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="liked_posts"
+        settings.AUTH_USER_MODEL,
+        related_name="liked_posts",
+        blank=True,
     )
 
     def __str__(self) -> str:
