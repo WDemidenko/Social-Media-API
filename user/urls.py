@@ -11,7 +11,7 @@ from user.views import (
     ManageUserView,
     UserViewSet,
     follow,
-    unfollow,
+    unfollow, FollowersListView, FollowingListView,
 )
 
 router = routers.DefaultRouter()
@@ -33,6 +33,8 @@ urlpatterns = [
         unfollow,
         name="unfollow",
     ),
+    path("following/", FollowingListView.as_view(), name='following-list'),
+    path('followers/', FollowersListView.as_view(), name='followers-list'),
     path("", include(router.urls)),
 ]
 

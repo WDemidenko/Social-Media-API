@@ -80,3 +80,24 @@ def unfollow(request, user_id):
 
     manage_url = reverse("user:manage")
     return HttpResponseRedirect(manage_url)
+
+
+class FollowingListView(generics.ListAPIView):
+    """users that the current user is following"""
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.following.all()
+
+
+class FollowersListView(generics.ListAPIView):
+    """users that are following the current user"""
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+
+        user = self.request.user
+        return User.objects.filter(following=user)
