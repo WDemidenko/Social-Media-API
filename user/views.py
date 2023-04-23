@@ -26,7 +26,11 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
-        return self.request.user
+        return (
+            User.objects.filter(id=self.request.user.id)
+            .prefetch_related("following")
+            .first()
+        )
 
 
 class UserViewSet(
@@ -39,7 +43,7 @@ class UserViewSet(
 
     def get_queryset(self):
         email = self.request.query_params.get("email")
-        queryset = self.queryset  # TODO fix n+1 problem
+        queryset = self.queryset.prefetch_related("following")
 
         if email:
             queryset = queryset.filter(email__icontains=email)
@@ -79,58 +83,67 @@ def unfollow(request, user_id):
 
 class FollowingListView(generics.ListAPIView):
     """users that the current user is following"""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_queryset(self):
         user = self.request.user
-        return user.following.all()
+        return user.following.all().prefetch_related("following")
 
 
 class FollowersListView(generics.ListAPIView):
     """users that are following the current user"""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_queryset(self):
-
         user = self.request.user
         return User.objects.filter(following=user)
 
 
 class UserPostsView(generics.ListAPIView):
     """Retrieve all the posts of the user"""
+
     serializer_class = PostListSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
-        user_posts = Post.objects.filter(user=user)
+        user_posts = Post.objects.filter(user=user).prefetch_related(
+            "hashtags", "liked_by"
+        )
 
         return user_posts
 
 
 class FollowingPostsView(generics.ListAPIView):
     """posts of all users that the current user is following"""
+
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         current_user = self.request.user
         following_users = current_user.following.all()
-        following_posts = Post.objects.filter(user__in=following_users)
+        following_posts = Post.objects.filter(
+            user__in=following_users
+        ).prefetch_related("hashtags", "liked_by")
 
         return following_posts
 
 
 class LikedPostsView(generics.ListAPIView):
     """retrieve all the posts that the user has liked"""
+
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-
         user = self.request.user
-        liked_posts = user.liked_posts.all()
+        liked_posts = user.liked_posts.all().prefetch_related(
+            "hashtags", "liked_by"
+        )
 
         return liked_posts

@@ -25,7 +25,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         hashtags = self.request.query_params.get("hashtags")
-        queryset = self.queryset
+        queryset = self.queryset.prefetch_related("hashtags", "liked_by")
 
         if hashtags:
             hashtags_ids = ids_from_string(hashtags)
