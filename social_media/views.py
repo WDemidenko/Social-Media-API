@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from social_media.models import Post
 from social_media.serializers import PostCreateSerializer, PostListSerializer
@@ -33,3 +35,21 @@ class PostViewSet(viewsets.ModelViewSet):
             return PostListSerializer
 
         return self.serializer_class
+
+    @action(detail=True, methods=["get"])
+    def like(self, request, pk=None):
+        """
+        Add the current user to the 'liked_by' ManyToManyField for the post.
+        """
+        post = self.get_object()
+        post.liked_by.add(request.user)
+        return Response({'detail': "Post liked successfully."})
+
+    @action(detail=True, methods=["get"])
+    def unlike(self, request, pk=None):
+        """
+        Remove the current user from the 'liked_by' ManyToManyField for the post.
+        """
+        post = self.get_object()
+        post.liked_by.remove(request.user)
+        return Response({"detail": "Post unliked successfully."})
