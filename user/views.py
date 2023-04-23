@@ -5,9 +5,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework import generics, viewsets, mixins
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from social_media.models import Post
+from social_media.serializers import PostListSerializer
 from user.serializers import UserSerializer
 
 User = get_user_model()
@@ -44,17 +47,13 @@ class UserViewSet(
         return queryset.distinct()
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def follow(request, user_id):
     """Add user_to_follow to current user's following"""
     user_to_follow = get_object_or_404(User, id=user_id)
 
-    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
-    token = auth_header.split(" ")[1] if auth_header else ""
-
-    decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-    user_id_from_token = decoded_token.get("user_id")
-
-    user = get_object_or_404(User, id=user_id_from_token)
+    user = request.user
 
     user.following.add(user_to_follow)
     user.save()
@@ -63,17 +62,13 @@ def follow(request, user_id):
     return HttpResponseRedirect(manage_url)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def unfollow(request, user_id):
     """Remove user_to_unfollow from current user's following"""
     user_to_follow = get_object_or_404(User, id=user_id)
 
-    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
-    token = auth_header.split(" ")[1] if auth_header else ""
-
-    decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-    user_id_from_token = decoded_token.get("user_id")
-
-    user = get_object_or_404(User, id=user_id_from_token)
+    user = request.user
 
     user.following.remove(user_to_follow)
     user.save()
@@ -101,3 +96,15 @@ class FollowersListView(generics.ListAPIView):
 
         user = self.request.user
         return User.objects.filter(following=user)
+
+
+class UserPostsView(generics.ListAPIView):
+    """Retrieve all the posts of the user"""
+    serializer_class = PostListSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        user = self.request.user
+        user_posts = Post.objects.filter(user=user)
+
+        return user_posts
