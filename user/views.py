@@ -121,3 +121,16 @@ class FollowingPostsView(generics.ListAPIView):
         following_posts = Post.objects.filter(user__in=following_users)
 
         return following_posts
+
+
+class LikedPostsView(generics.ListAPIView):
+    """retrieve all the posts that the user has liked"""
+    serializer_class = PostListSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+
+        user = self.request.user
+        liked_posts = user.liked_posts.all()
+
+        return liked_posts

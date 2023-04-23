@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = get_user_model()
         fields = (
@@ -13,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
             "profile_picture",
             "following",
         )
-        read_only_fields = ("is_staff", "following")
+        read_only_fields = ("is_staff", "following", "liked_posts")
         extra_kwargs = {
             "password": {"write_only": True, "min_length": 5},
         }
