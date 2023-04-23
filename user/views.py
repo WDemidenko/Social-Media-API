@@ -86,6 +86,7 @@ class FollowingListView(generics.ListAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
@@ -97,6 +98,7 @@ class FollowersListView(generics.ListAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
