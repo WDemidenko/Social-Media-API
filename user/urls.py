@@ -10,6 +10,8 @@ from user.views import (
     CreateUserView,
     ManageUserView,
     UserViewSet,
+    follow,
+    unfollow,
 )
 
 router = routers.DefaultRouter()
@@ -21,6 +23,16 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("me/", ManageUserView.as_view(), name="manage"),
+    path(
+        "follow/<int:user_id>/",
+        follow,
+        name="follow",
+    ),
+    path(
+        "unfollow/<int:user_id>/",
+        unfollow,
+        name="unfollow",
+    ),
     path("", include(router.urls)),
 ]
 
