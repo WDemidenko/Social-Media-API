@@ -11,7 +11,7 @@ from user.views import (
     ManageUserView,
     UserViewSet,
     follow,
-    unfollow, FollowersListView, FollowingListView, UserPostsView,
+    unfollow, FollowersListView, FollowingListView, UserPostsView, FollowingPostsView,
 )
 
 router = routers.DefaultRouter()
@@ -24,6 +24,7 @@ urlpatterns = [
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("me/", ManageUserView.as_view(), name="manage"),
     path("me/posts/", UserPostsView.as_view(), name="me-posts"),
+    path("me/following_posts/", FollowingPostsView.as_view(), name="following-posts"),
     path(
         "follow/<int:user_id>/",
         follow,

@@ -108,3 +108,16 @@ class UserPostsView(generics.ListAPIView):
         user_posts = Post.objects.filter(user=user)
 
         return user_posts
+
+
+class FollowingPostsView(generics.ListAPIView):
+    """posts of all users that the current user is following"""
+    serializer_class = PostListSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        current_user = self.request.user
+        following_users = current_user.following.all()
+        following_posts = Post.objects.filter(user__in=following_users)
+
+        return following_posts
