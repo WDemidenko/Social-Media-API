@@ -4,13 +4,14 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from social_media.models import Post, Comment
+from social_media.models import Post, Comment, Hashtag
 from social_media.serializers import (
     PostCreateSerializer,
     PostListSerializer,
     CommentSerializer,
     PostDetailSerializer,
     CommentListSerializer,
+    HashtagSerializer,
 )
 
 
@@ -71,3 +72,8 @@ class CommentCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         post_id = self.kwargs.get("pk")
         serializer.save(user=self.request.user, post_id=post_id)
+
+
+class HashtagViewSet(viewsets.ModelViewSet):
+    queryset = Hashtag.objects.all()
+    serializer_class = HashtagSerializer
