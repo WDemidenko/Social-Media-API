@@ -1,9 +1,8 @@
-import jwt
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, viewsets, mixins
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -50,6 +49,20 @@ class UserViewSet(
 
         return queryset.distinct()
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "email",
+                type={"type": "string"},
+                description=(
+                    "Filter by containing email text, " "example: ?email=abc"
+                ),
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -82,7 +95,7 @@ def unfollow(request, user_id):
 
 
 class FollowingListView(generics.ListAPIView):
-    """users that the current user is following"""
+    """Users that the current user is following"""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -94,7 +107,7 @@ class FollowingListView(generics.ListAPIView):
 
 
 class FollowersListView(generics.ListAPIView):
-    """users that are following the current user"""
+    """Users that are following the current user"""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -121,7 +134,7 @@ class UserPostsView(generics.ListAPIView):
 
 
 class FollowingPostsView(generics.ListAPIView):
-    """posts of all users that the current user is following"""
+    """Posts of all users that the current user is following"""
 
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated,)
@@ -137,7 +150,7 @@ class FollowingPostsView(generics.ListAPIView):
 
 
 class LikedPostsView(generics.ListAPIView):
-    """retrieve all the posts that the user has liked"""
+    """Retrieve all the posts that the user has liked"""
 
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated,)

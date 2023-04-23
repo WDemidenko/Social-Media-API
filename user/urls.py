@@ -11,7 +11,12 @@ from user.views import (
     ManageUserView,
     UserViewSet,
     follow,
-    unfollow, FollowersListView, FollowingListView, UserPostsView, FollowingPostsView, LikedPostsView,
+    unfollow,
+    FollowersListView,
+    FollowingListView,
+    UserPostsView,
+    FollowingPostsView,
+    LikedPostsView,
 )
 
 router = routers.DefaultRouter()
@@ -25,7 +30,11 @@ urlpatterns = [
     path("me/", ManageUserView.as_view(), name="manage"),
     path("me/posts/", UserPostsView.as_view(), name="me-posts"),
     path("me/liked_posts/", LikedPostsView.as_view(), name="liked-posts"),
-    path("me/following_posts/", FollowingPostsView.as_view(), name="following-posts"),
+    path(
+        "me/following_posts/",
+        FollowingPostsView.as_view(),
+        name="following-posts",
+    ),
     path(
         "follow/<int:user_id>/",
         follow,
@@ -36,8 +45,8 @@ urlpatterns = [
         unfollow,
         name="unfollow",
     ),
-    path("following/", FollowingListView.as_view(), name='following-list'),
-    path('followers/', FollowersListView.as_view(), name='followers-list'),
+    path("following/", FollowingListView.as_view(), name="following-list"),
+    path("followers/", FollowersListView.as_view(), name="followers-list"),
     path("", include(router.urls)),
 ]
 

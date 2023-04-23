@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, generics, status, mixins
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from social_media.models import Post, Comment, Hashtag
 from social_media.serializers import (
     PostListSerializer,
-    CommentSerializer,
     PostDetailSerializer,
     CommentListSerializer,
     HashtagSerializer,
@@ -94,13 +93,26 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return super().partial_update(request, *args, **kwargs)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "hashtags",
+                type={"type": "list", "items": {"type": "number"}},
+                description=("Filter by containing hashtag id, "
+                             "example: ?hashtags=1,2")
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class CommentSetView(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
+    viewsets.GenericViewSet,
 ):
     queryset = Comment.objects.all()
     serializer_class = CommentListSerializer
@@ -115,6 +127,8 @@ class CommentSetView(
 
 
 class CommentCreateView(generics.CreateAPIView):
+    """Add comment to current post by current user"""
+
     queryset = Comment.objects.all()
     serializer_class = CommentListSerializer
     permission_classes = (IsAuthenticated,)
